@@ -1,5 +1,31 @@
 ﻿namespace LiveSplit.SaltSanctuary.Data
 {
+	public enum Bosses
+	{
+		UnspeakableDeep,
+		SoddenKnight,
+		Alchemist,
+		Jester,
+		Cyclops,
+		QueenOfSmiles,
+		BloodlessPrince,
+		Carsejaw,
+		RoninCran,
+		TreeOfMen,
+		DisemboweledHusk,
+		Coveted,
+		DriedKing,
+		UntouchedInquisitor,
+		ThirdLamb,
+		Wyrm,
+		Mal,
+		Witch,
+		Unskinned,
+		ForgottenKing,
+		Dragon,
+		NamelessGod
+	}
+
 	public enum TransitionTypes
 	{
 		None = 0,
@@ -18,7 +44,7 @@
 		Credits = 4
 	}
 
-	public enum MenuTypes
+	public enum Menus
 	{
 		PressStart = 0,
 		Main = 1,

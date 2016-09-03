@@ -31,9 +31,9 @@ namespace LiveSplit.SaltSanctuary.Memory
 			return (Gamestates)gamestatePointer.Read<int>();
 		}
 
-		public MenuTypes GetCurrentMenuType()
+		public Menus GetCurrentMenuType()
 		{
-			return (MenuTypes)playerManagerPointer.Read<int>(0x0, 0x17, 0x0, 0x8, 0x3C, 0x14);
+			return (Menus)playerManagerPointer.Read<int>(0x0, 0x17, 0x0, 0x8, 0x3C, 0x14);
 		}
 
 		public TransitionTypes GetCurrentTransitionType()

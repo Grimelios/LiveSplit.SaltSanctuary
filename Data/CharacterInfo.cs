@@ -20,10 +20,5 @@ namespace LiveSplit.SaltSanctuary.Data
 		public PointF Position { get; set; }
 		public float HP { get; set; }
 		public float Stamina { get; set; }
-
-		public override string ToString()
-		{
-			return Name + " (" + HP.ToString("0.0") + ", " + Stamina.ToString("0.0") + ") [" + Position.X.ToString("0.00") + ", " + Position.Y.ToString("0.00") + "]";
-		}
 	}
 }

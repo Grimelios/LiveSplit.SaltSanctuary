@@ -24,7 +24,6 @@ namespace LiveSplit.SaltSanctuary
 			"Boss",
 			"Gamestate",
 			"Menu",
-			"Player",
             "Split",
 			"Transition"
 		};
@@ -119,10 +118,10 @@ namespace LiveSplit.SaltSanctuary
 
 			if (currentSplit == -1)
 			{
-				MenuTypes menuType = memory.GetCurrentMenuType();
+				Menus menuType = memory.GetCurrentMenuType();
 				TransitionTypes transitionType = memory.GetCurrentTransitionType();
 				
-				shouldSplit = menuType == MenuTypes.VentureForth && transitionType == TransitionTypes.AllOut;
+				shouldSplit = menuType == Menus.VentureForth && transitionType == TransitionTypes.AllOut;
 			}
 			else if (model.CurrentState.CurrentPhase == TimerPhase.Running)
 			{
@@ -220,22 +219,6 @@ namespace LiveSplit.SaltSanctuary
 				string previousValue = previousValues[key];
 				string currentValue = GetCurrentValue(key);
 
-				/*
-				switch (key)
-				{
-					case "Boss":
-						CharacterInfo boss = memory.BossInfo(currentBossIndex);
-						currentValue = boss == null ? "" : (boss.Name + " - " + boss.HP.ToString("0.0")); break;
-					case "Gamestates": currentValue = memory.Gamestates().ToString(); break;
-					case "MenuTypes": currentValue = memory.GetCurrentMenuType().ToString(); break;
-					case "TransitionTypes": currentValue = memory.TransitionTypes().ToString(); break;
-					case "Player":
-						CharacterInfo player = memory.PlayerInfo();
-						curr = player?.HP.ToString("0.0") ?? ""; break;
-					case "CurrentSplit": currentValue = currentSplit.ToString(); break;
-				}
-				*/
-
 				if (currentValue != previousValue)
 				{
 					Log("[Change] " + key + " changed (" + previousValue + " => " + currentValue + ")");
@@ -248,6 +231,9 @@ namespace LiveSplit.SaltSanctuary
 		{
 			switch (key)
 			{
+				case "Boss":
+					return ((Bosses)currentBossIndex).ToString();
+
 				case "Gamestate":
 					return memory.GetCurrentGamestate().ToString();
 
@@ -261,7 +247,7 @@ namespace LiveSplit.SaltSanctuary
 					return memory.GetCurrentTransitionType().ToString();
 			}
 
-			return "";
+			return null;
 		}
 
 		private void Log(string value)
