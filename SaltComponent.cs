@@ -82,8 +82,16 @@ namespace LiveSplit.SaltSanctuary
 			splitBosses[20].Add(Bosses.DeadKing);
 			splitBosses[20].Add(Bosses.DeadJudge);
 			splitBosses[21].Add(Bosses.SquidDragon);
-			
-			ResetLogging();	
+
+			for (int i = 0; i < TotalSplits; i++)
+			{
+				bossesLogged[i] = new List<bool>();
+
+				for (int j = 0; j < splitBosses[i].Count; j++)
+				{
+					bossesLogged[i].Add(false);
+				}
+			}
 		}
 
 		public string ComponentName => "Salt and Sanctuary Autosplitter";
@@ -98,19 +106,6 @@ namespace LiveSplit.SaltSanctuary
 		public float VerticalHeight => 0;
 
 		public ContextMenuControls ContextMenuControls => null;
-
-		private void ResetLogging()
-		{
-			for (int i = 0; i < TotalSplits; i++)
-			{
-				bossesLogged[i] = new List<bool>();
-
-				for (int j = 0; j < splitBosses[i].Count; j++)
-				{
-					bossesLogged[i].Add(false);
-				}
-			}
-		}
 
 		public void Update(IInvalidator invalidator, LiveSplitState liveSplitState, float width, float height, LayoutMode mode)
 		{
@@ -203,27 +198,22 @@ namespace LiveSplit.SaltSanctuary
 			}
 		}
 
-		private void Autosplit(bool shouldReset = false)
+		private void Autosplit()
 		{
-			if (currentSplit > 0 && shouldReset)
-			{
-				model.Reset();
-			}
-			else if (currentSplit == -1)
+			if (currentSplit == -1)
 			{
 				model.Start();
-				currentSplit++;
 			}
 			else
 			{
 				model.Split();
-				currentSplit++;
 			}
 		}
 
 		private void HandleStart(object sender, EventArgs e)
 		{
 			ResetValues();
+			currentSplit++;
 			Log("[Timer] Timer started.");
 		}
 
@@ -267,7 +257,13 @@ namespace LiveSplit.SaltSanctuary
 			currentSplit = -1;
 			model.CurrentState.IsGameTimePaused = true;
 
-			ResetLogging();
+			foreach (List<bool> logList in bossesLogged)
+			{
+				for (int i = 0; i < logList.Count; i++)
+				{
+					logList[i] = false;
+				}
+			}
 		}
 
 		public void LogValues()
@@ -306,7 +302,7 @@ namespace LiveSplit.SaltSanctuary
 		{
 			if (logTime)
 			{
-				value += " [" + model.CurrentState.Run[currentSplit].SplitTime + "]";
+				value += " [" + model.CurrentState.Run[currentSplit].SplitTime.RealTime + "]";
 			}
 
             if (Console.IsOutputRedirected)
