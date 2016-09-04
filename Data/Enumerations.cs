@@ -2,28 +2,19 @@
 {
 	public enum Bosses
 	{
-		UnspeakableDeep,
-		SoddenKnight,
+		Leviathon = 32,
+		Dread = 6,
 		Alchemist,
-		Jester,
+		FauxJester = 98,
 		Cyclops,
-		QueenOfSmiles,
-		BloodlessPrince,
-		Carsejaw,
-		RoninCran,
-		TreeOfMen,
-		DisemboweledHusk,
-		Coveted,
-		DriedKing,
-		UntouchedInquisitor,
-		ThirdLamb,
-		Wyrm,
-		Mal,
-		Witch,
-		Unskinned,
-		ForgottenKing,
-		Dragon,
-		NamelessGod
+		CutQueen = 19,
+		Gasbag = 71,
+		Cloak = 180,
+		TortureTree = 45,
+		Inquisitor = 124,
+		LakeWitch = 78,
+		Dragon = 33,
+		Nameless = 174
 	}
 
 	public enum TransitionTypes

@@ -30,7 +30,7 @@ namespace LiveSplit.SaltSanctuary
 
 		private TimerModel model;
 		private SaltMemory memory;
-		private HashSet<int> killedBosses;
+		private HashSet<Bosses> killedBosses;
 		private StreamWriter logWriter;
 
 		private int currentSplit;
@@ -41,16 +41,16 @@ namespace LiveSplit.SaltSanctuary
 		public SaltComponent()
 		{
 			memory = new SaltMemory();
-			killedBosses = new HashSet<int>();
+			killedBosses = new HashSet<Bosses>();
 			logWriter = new StreamWriter(LogFilename, false);
 			currentSplit = -1;
 			previousValues = new Dictionary<string, string>();
 
 			foreach (string key in logKeys)
 			{
-				previousValues.Add(key, "");
+				previousValues.Add(key, "[None]");
 			}
-        }
+		}
 
 		public string ComponentName => "Salt and Sanctuary Autosplitter";
 
@@ -105,7 +105,7 @@ namespace LiveSplit.SaltSanctuary
 
 			if (bossInfo != null && bossInfo.Index != currentBossIndex)
 			{
-				currentBossIndex = bossInfo.Index;
+				currentBossIndex = bossInfo.MonsterIndex;
 			}
 
 			CheckAutosplit();
@@ -123,16 +123,21 @@ namespace LiveSplit.SaltSanctuary
 				
 				shouldSplit = menuType == Menus.VentureForth && transitionType == TransitionTypes.AllOut;
 			}
-			else if (model.CurrentState.CurrentPhase == TimerPhase.Running)
+			else (model.CurrentState.CurrentPhase == TimerPhase.Running)
 			{
 				if (currentSplit < TotalSplits - 1)
 				{
 					CharacterInfo bossInfo = memory.GetBossInfo(currentBossIndex);
 
-					if (bossInfo != null && bossInfo.HP <= 0 && !killedBosses.Contains(bossInfo.MonsterIndex))
+					if (bossInfo != null && bossInfo.HP <= 0)
 					{
-						killedBosses.Add(bossInfo.MonsterIndex);
-						shouldSplit = true;
+						Bosses boss = (Bosses)bossInfo.MonsterIndex;
+
+						if (!killedBosses.Contains(boss))
+						{
+							killedBosses.Add(boss);
+							shouldSplit = true;
+						}
 					}
 				}
 				else if (currentSplit == TotalSplits - 1)

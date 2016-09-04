@@ -64,9 +64,8 @@ namespace LiveSplit.SaltSanctuary.Memory
 						float px = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD4);
 						float py = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD8);
 						float hp = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x60);
-						float stamina = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x8C);
 
-						return new CharacterInfo(i, monsterIndex, name, new PointF(px, py), hp, stamina);
+						return new CharacterInfo(i, monsterIndex, name, new PointF(px, py), hp);
 					}
 				}
 			}
@@ -95,9 +94,8 @@ namespace LiveSplit.SaltSanctuary.Memory
 					float px = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD4);
 					float py = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD8);
 					float hp = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x60);
-					float stamina = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x8C);
 
-					return new CharacterInfo(index, monsterIndex, name, new PointF(px, py), hp, stamina);
+					return new CharacterInfo(index, monsterIndex, name, new PointF(px, py), hp);
 				}
 			}
 
