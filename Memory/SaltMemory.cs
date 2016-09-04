@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using LiveSplit.SaltSanctuary.Data;
@@ -41,11 +42,11 @@ namespace LiveSplit.SaltSanctuary.Memory
 			return (TransitionTypes)playerManagerPointer.Read<int>(0x0, 0x17, 0x0, 0x8, 0x3C, 0x18);
 		}
 
-		public CharacterInfo GetPlayerInfo()
+		public PointF GetPlayerPosition()
 		{
 			if (characterManagerPointer.Value == IntPtr.Zero)
 			{
-				return null;
+				return PointF.Empty;
 			}
 
 			int length = characterManagerPointer.Read<int>(0x4);
@@ -57,23 +58,21 @@ namespace LiveSplit.SaltSanctuary.Memory
 				if (exists)
 				{
 					int monsterIndex = characterManagerPointer.Read<int>(0x8 + (0x4 * i), 0x5C);
-					string name = monsterCatalogPointer.ReadString(0x4, 0x8 + (0x4 * monsterIndex), 0x4);
 
-					if (name == "hero")
+					if (monsterIndex == 3)
 					{
-						float px = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD4);
-						float py = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD8);
-						float hp = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x60);
+						float x = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD4);
+						float y = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD8);
 
-						return new CharacterInfo(i, monsterIndex, name, new PointF(px, py), hp);
+						return new PointF(x, y);
 					}
 				}
 			}
 
-			return null;
+			return PointF.Empty;
 		}
 
-		public CharacterInfo GetBossInfo(int index = -1)
+		public float[] GetBossHealth(List<Bosses> bosses)
 		{
 			if (characterManagerPointer.Value == IntPtr.Zero)
 			{
@@ -81,25 +80,39 @@ namespace LiveSplit.SaltSanctuary.Memory
 			}
 
 			int length = characterManagerPointer.Read<int>(0x4);
+			float[] bossHealth = null;
 
-			for (int i = index < 0 ? 0 : index; i < length; i++)
+			for (int i = 0; i < length; i++)
 			{
 				bool exists = characterManagerPointer.Read<bool>(0x8 + (0x4 * i), 0xC8);
-				bool isBoss = characterManagerPointer.Read<bool>(0x8 + (0x4 * i), 0xD2);
 
-				if (isBoss && (exists || index >= 0))
+				if (exists)
 				{
 					int monsterIndex = characterManagerPointer.Read<int>(0x8 + (0x4 * i), 0x5C);
 					string name = monsterCatalogPointer.ReadString(0x4, 0x8 + (0x4 * monsterIndex), 0x4);
-					float px = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD4);
-					float py = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0xD8);
-					float hp = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x60);
 
-					return new CharacterInfo(index, monsterIndex, name, new PointF(px, py), hp);
+					for (int j = 0; j < bosses.Count; j++)
+					{
+						if (monsterIndex == (int)bosses[j])
+						{
+							if (bossHealth == null)
+							{
+								bossHealth = new float[bosses.Count];
+
+								for (int k = 0; k < bossHealth.Length; k++)
+								{
+									bossHealth[k] = float.MaxValue;
+								}
+							}
+
+							float hp = characterManagerPointer.Read<float>(0x8 + (0x4 * i), 0x60);
+							bossHealth[j] = hp;
+						}
+					}
 				}
 			}
 
-			return null;
+			return bossHealth;
 		}
 
 		public bool HookProcess()

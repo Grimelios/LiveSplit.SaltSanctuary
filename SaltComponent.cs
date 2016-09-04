@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
 using LiveSplit.Model;
@@ -21,27 +22,24 @@ namespace LiveSplit.SaltSanctuary
 
 		private static string[] logKeys =
 		{
-			"Boss",
 			"Gamestate",
 			"Menu",
-            "Split",
-			"Transition"
+            "Split"
 		};
 
 		private TimerModel model;
 		private SaltMemory memory;
-		private HashSet<Bosses> killedBosses;
 		private StreamWriter logWriter;
 
 		private int currentSplit;
-		private int currentBossIndex;
 
 		private Dictionary<string, string> previousValues;
+		private List<Bosses>[] splitBosses;
+		private List<bool>[] bossesLogged;
 
 		public SaltComponent()
 		{
 			memory = new SaltMemory();
-			killedBosses = new HashSet<Bosses>();
 			logWriter = new StreamWriter(LogFilename, false);
 			currentSplit = -1;
 			previousValues = new Dictionary<string, string>();
@@ -50,6 +48,42 @@ namespace LiveSplit.SaltSanctuary
 			{
 				previousValues.Add(key, "[None]");
 			}
+
+			splitBosses = new List<Bosses>[TotalSplits];
+			bossesLogged = new List<bool>[TotalSplits];
+
+			for (int i = 0; i < TotalSplits; i++)
+			{
+				splitBosses[i] = new List<Bosses>();
+			}
+
+			splitBosses[0].Add(Bosses.Leviathon);
+			splitBosses[1].Add(Bosses.Dread);
+			splitBosses[2].Add(Bosses.Alchemist);
+			splitBosses[3].Add(Bosses.FauxJester);
+			splitBosses[4].Add(Bosses.Bull);
+			splitBosses[5].Add(Bosses.CutQueen);
+			splitBosses[6].Add(Bosses.GasBag);
+			splitBosses[7].Add(Bosses.Clay);
+			splitBosses[8].Add(Bosses.Cloak);
+			splitBosses[9].Add(Bosses.Broken);
+			splitBosses[10].Add(Bosses.TortureTree);
+			splitBosses[11].Add(Bosses.Pirate);
+			splitBosses[12].Add(Bosses.Ruinaxe);
+			splitBosses[13].Add(Bosses.Mummy);
+			splitBosses[14].Add(Bosses.Inquisitor);
+			splitBosses[15].Add(Bosses.Hippogriff);
+			splitBosses[16].Add(Bosses.Dragon);
+			splitBosses[17].Add(Bosses.Butterfly);
+			splitBosses[18].Add(Bosses.LakeWitch);
+			splitBosses[19].Add(Bosses.Monster);
+			splitBosses[19].Add(Bosses.MonsterWitch);
+			splitBosses[20].Add(Bosses.DeadKnight);
+			splitBosses[20].Add(Bosses.DeadKing);
+			splitBosses[20].Add(Bosses.DeadJudge);
+			splitBosses[21].Add(Bosses.SquidDragon);
+			
+			ResetLogging();	
 		}
 
 		public string ComponentName => "Salt and Sanctuary Autosplitter";
@@ -64,6 +98,19 @@ namespace LiveSplit.SaltSanctuary
 		public float VerticalHeight => 0;
 
 		public ContextMenuControls ContextMenuControls => null;
+
+		private void ResetLogging()
+		{
+			for (int i = 0; i < TotalSplits; i++)
+			{
+				bossesLogged[i] = new List<bool>();
+
+				for (int j = 0; j < splitBosses[i].Count; j++)
+				{
+					bossesLogged[i].Add(false);
+				}
+			}
+		}
 
 		public void Update(IInvalidator invalidator, LiveSplitState liveSplitState, float width, float height, LayoutMode mode)
 		{
@@ -101,13 +148,6 @@ namespace LiveSplit.SaltSanctuary
 				return;
 			}
 
-			CharacterInfo bossInfo = memory.GetBossInfo();
-
-			if (bossInfo != null && bossInfo.Index != currentBossIndex)
-			{
-				currentBossIndex = bossInfo.MonsterIndex;
-			}
-
 			CheckAutosplit();
 			LogValues();
 		}
@@ -120,30 +160,40 @@ namespace LiveSplit.SaltSanctuary
 			{
 				Menus menuType = memory.GetCurrentMenuType();
 				TransitionTypes transitionType = memory.GetCurrentTransitionType();
-				
+
 				shouldSplit = menuType == Menus.VentureForth && transitionType == TransitionTypes.AllOut;
 			}
-			else (model.CurrentState.CurrentPhase == TimerPhase.Running)
+			else if (model.CurrentState.CurrentPhase == TimerPhase.Running)
 			{
 				if (currentSplit < TotalSplits - 1)
 				{
-					CharacterInfo bossInfo = memory.GetBossInfo(currentBossIndex);
+					List<Bosses> bosses = splitBosses[currentSplit];
+					List<bool> bossesLogged = this.bossesLogged[currentSplit];
+					float[] bossHealth = memory.GetBossHealth(splitBosses[currentSplit]);
 
-					if (bossInfo != null && bossInfo.HP <= 0)
+					if (bossHealth != null)
 					{
-						Bosses boss = (Bosses)bossInfo.MonsterIndex;
-
-						if (!killedBosses.Contains(boss))
+						for (int i = 0; i < bosses.Count; i++)
 						{
-							killedBosses.Add(boss);
-							shouldSplit = true;
+							if (bossHealth[i] <= 0 && !bossesLogged[i])
+							{
+								Log("[Boss] " + bosses[i] + " killed", true);
+								bossesLogged[i] = true;
+							}
 						}
+
+						shouldSplit = bossesLogged.Count(bossKilled => bossKilled) == bosses.Count;
 					}
 				}
 				else if (currentSplit == TotalSplits - 1)
 				{
-					CharacterInfo playerInfo = memory.GetPlayerInfo();
-					shouldSplit = playerInfo.Position.X > 99999 && playerInfo.Position.Y > 99999;
+					PointF playerPosition = memory.GetPlayerPosition();
+					shouldSplit = playerPosition.X > 66000 && playerPosition.X < 66400 && playerPosition.Y > 47500;
+
+					if (shouldSplit)
+					{
+						Log("[End] Run complete", true);
+					}
 				}
 			}
 
@@ -162,10 +212,12 @@ namespace LiveSplit.SaltSanctuary
 			else if (currentSplit == -1)
 			{
 				model.Start();
+				currentSplit++;
 			}
 			else
 			{
 				model.Split();
+				currentSplit++;
 			}
 		}
 
@@ -213,8 +265,9 @@ namespace LiveSplit.SaltSanctuary
 		private void ResetValues()
 		{
 			currentSplit = -1;
-			killedBosses.Clear();
 			model.CurrentState.IsGameTimePaused = true;
+
+			ResetLogging();
 		}
 
 		public void LogValues()
@@ -236,9 +289,6 @@ namespace LiveSplit.SaltSanctuary
 		{
 			switch (key)
 			{
-				case "Boss":
-					return ((Bosses)currentBossIndex).ToString();
-
 				case "Gamestate":
 					return memory.GetCurrentGamestate().ToString();
 
@@ -247,17 +297,19 @@ namespace LiveSplit.SaltSanctuary
 
 				case "Split":
 					return currentSplit.ToString();
-
-				case "Transition":
-					return memory.GetCurrentTransitionType().ToString();
 			}
 
 			return null;
 		}
 
-		private void Log(string value)
+		private void Log(string value, bool logTime = false)
 		{
-			if (Console.IsOutputRedirected)
+			if (logTime)
+			{
+				value += " [" + model.CurrentState.Run[currentSplit].SplitTime + "]";
+			}
+
+            if (Console.IsOutputRedirected)
 			{
 				logWriter.WriteLine(value);
 			}

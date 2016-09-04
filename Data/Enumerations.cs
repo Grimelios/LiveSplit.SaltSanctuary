@@ -2,18 +2,32 @@
 {
 	public enum Bosses
 	{
+		Unassigned = 0,
 		Leviathon = 32,
 		Dread = 6,
-		Alchemist,
+		Alchemist = 44,
 		FauxJester = 98,
-		Cyclops,
+		Bull = 4,
 		CutQueen = 19,
-		Gasbag = 71,
+		GasBag = 71,
+		Clay = 95,
 		Cloak = 180,
+		Broken = 66,
 		TortureTree = 45,
+		Pirate = 53,
+		Ruinaxe = 157,
+		Mummy = 102,
 		Inquisitor = 124,
-		LakeWitch = 78,
+		Hippogriff = 87,
 		Dragon = 33,
+		Butterfly = 189,
+		LakeWitch = 78,
+		Monster = 143,
+		MonsterWitch = 144,
+		DeadKnight = 191,
+		DeadKing = 192,
+		DeadJudge = 193,
+		SquidDragon = 172,
 		Nameless = 174
 	}
 
